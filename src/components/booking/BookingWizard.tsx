@@ -193,33 +193,45 @@ export function BookingWizard() {
     <>
       {showSuccess && <SuccessModal data={data} onClose={handleClose} />}
 
-      <div className="bg-white border border-grey-200 rounded-lg shadow-sm overflow-hidden">
+      <div className="bg-white border border-grey-200 rounded-lg shadow-sm overflow-hidden w-full">
 
         {/* Progress Header */}
-        <div className="flex bg-grey-50 border-b border-grey-200 px-8 py-6">
+        <div className="flex bg-grey-50 border-b border-grey-200 px-4 sm:px-8 py-4 sm:py-6">
           {STEPS.map((s, i) => {
-            const done   = current > s.num;
+            const done = current > s.num;
             const active = current === s.num;
             return (
               <div key={s.num} className="flex-1 text-center relative">
                 {i < STEPS.length - 1 && (
-                  <span className={[
-                    "absolute top-4 left-1/2 w-full h-[3px] z-0 transition-all duration-300",
-                    done ? "bg-brand" : "bg-grey-300",
-                  ].join(" ")} />
+                  <span
+                    className={[
+                      "absolute top-3.5 sm:top-4 left-1/2 w-full h-[3px] z-0 transition-all duration-300",
+                      done ? "bg-brand" : "bg-grey-300",
+                    ].join(" ")}
+                  />
                 )}
-                <div className={[
-                  "relative z-10 w-8 h-8 rounded-full inline-flex items-center justify-center font-bold text-sm transition-all duration-300",
-                  done   ? "bg-brand text-white border-2 border-brand" : "",
-                  active ? "bg-brand text-white border-2 border-brand shadow-[0_0_0_4px_rgba(163,20,31,0.15)]" : "",
-                  !done && !active ? "bg-white text-grey-400 border-2 border-grey-300" : "",
-                ].join(" ")}>
+                <div
+                  className={[
+                    "relative z-10 w-8 h-8 sm:w-9 sm:h-9 rounded-full inline-flex items-center justify-center font-bold text-sm sm:text-base transition-all duration-300",
+                    done
+                      ? "bg-brand text-white border-2 border-brand"
+                      : "",
+                    active
+                      ? "bg-brand text-white border-2 border-brand shadow-[0_0_0_4px_rgba(163,20,31,0.15)]"
+                      : "",
+                    !done && !active
+                      ? "bg-white text-grey-400 border-2 border-grey-300"
+                      : "",
+                  ].join(" ")}
+                >
                   {done ? "✓" : s.num}
                 </div>
-                <span className={[
-                  "block text-xs font-semibold mt-3 uppercase tracking-wide",
-                  active ? "text-brand" : "text-grey-500",
-                ].join(" ")}>
+                <span
+                  className={[
+                    "block text-[10px] sm:text-xs font-semibold mt-2 sm:mt-3 uppercase tracking-wide",
+                    active ? "text-brand" : "text-grey-500",
+                  ].join(" ")}
+                >
                   {s.label}
                 </span>
               </div>
@@ -228,38 +240,40 @@ export function BookingWizard() {
         </div>
 
         {/* Step Content */}
-        <div className="p-16">
-          {renderStep()}
+        <div className="p-4 sm:p-8 md:p-16">
+          <div className="w-full overflow-x-hidden">{renderStep()}</div>
 
           {/* Nav Buttons */}
-          <div className="flex justify-between pt-8 mt-8 border-t border-grey-200">
-            <button
-              type="button"
-              onClick={prev}
-              style={{ visibility: current === 1 ? "hidden" : "visible" }}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-md bg-white text-grey-700 font-semibold text-[0.95rem] border border-grey-300 transition-all duration-200 hover:bg-grey-100 hover:border-grey-400 cursor-pointer"
-            >
-              ← Sebelumnya
-            </button>
+          <div className="pt-6 sm:pt-8 mt-6 sm:mt-8 border-t border-grey-200">
+            <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-0 sm:justify-between">
+              <button
+                type="button"
+                onClick={prev}
+                style={{ visibility: current === 1 ? "hidden" : "visible" }}
+                className="w-full sm:w-auto inline-flex items-center justify-center sm:justify-start gap-2 px-5 sm:px-6 py-3 rounded-md bg-white text-grey-700 font-semibold text-sm sm:text-[0.95rem] border border-grey-300 transition-all duration-200 hover:bg-grey-100 hover:border-grey-400 cursor-pointer"
+              >
+                ← Sebelumnya
+              </button>
 
-            {current < 4 ? (
-              <button
-                type="button"
-                onClick={next}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-md bg-brand text-white font-semibold text-[0.95rem] shadow-sm transition-all duration-200 hover:bg-brand-dark hover:-translate-y-px hover:shadow-md cursor-pointer"
-              >
-                Selanjutnya →
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={handleSubmit}
-                disabled={isLoading}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-md bg-brand text-white font-semibold text-[0.95rem] shadow-sm transition-all duration-200 hover:bg-brand-dark cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                {isLoading ? "⏳ Mengirim..." : "✅ Kirim Pengajuan"}
-              </button>
-            )}
+              {current < 4 ? (
+                <button
+                  type="button"
+                  onClick={next}
+                  className="w-full sm:w-auto inline-flex items-center justify-center sm:justify-start gap-2 px-5 sm:px-6 py-3 rounded-md bg-brand text-white font-semibold text-sm sm:text-[0.95rem] shadow-sm transition-all duration-200 hover:bg-brand-dark hover:-translate-y-px hover:shadow-md cursor-pointer"
+                >
+                  Selanjutnya →
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={isLoading}
+                  className="w-full sm:w-auto inline-flex items-center justify-center sm:justify-start gap-2 px-5 sm:px-6 py-3 rounded-md bg-brand text-white font-semibold text-sm sm:text-[0.95rem] shadow-sm transition-all duration-200 hover:bg-brand-dark cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? "⏳ Mengirim..." : "✅ Kirim Pengajuan"}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
