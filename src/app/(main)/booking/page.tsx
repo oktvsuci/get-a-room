@@ -7,16 +7,18 @@ export const metadata = {
 
 export default function BookingPage() {
   return (
-    <main className="max-w-4xl mx-auto px-4 py-12">
-      <div className="mb-10">
-        <h1 className="text-3xl font-bold text-grey-900 mb-2">
-          Pengajuan Peminjaman Ruangan
-        </h1>
-        <p className="text-grey-500">
-          Lengkapi formulir berikut untuk mengajukan peminjaman fasilitas Telkom University.
-        </p>
+    <main className="w-full min-h-screen flex flex-col items-center px-4 py-10 sm:py-12">
+      <div className="w-full max-w-4xl">
+        <div className="mb-8 sm:mb-10">
+          <h1 className="text-2xl sm:text-3xl font-bold text-grey-900 mb-2">
+            Pengajuan Peminjaman Ruangan
+          </h1>
+          <p className="text-grey-500 text-sm sm:text-base">
+            Lengkapi formulir berikut untuk mengajukan peminjaman fasilitas Telkom University.
+          </p>
+        </div>
+        <BookingWizard />
       </div>
-      <BookingWizard />
     </main>
   );
 }
