@@ -101,11 +101,11 @@ export default function BerandaPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6 w-full max-w-6xl mx-auto px-2">
             {FEATURES.map((f) => (
               <div
                 key={f.title}
-                className="w-full bg-white border border-grey-200 rounded-lg p-10 text-center shadow-sm transition-all duration-300 hover:shadow-md hover:border-grey-300"
+                className="w-full bg-white border border-grey-200 rounded-lg p-3 md:p-6 text-center shadow-sm transition-all duration-300 hover:shadow-md hover:border-grey-300"
               >
                 <div className="w-16 h-16 bg-grey-100 text-brand rounded-md flex items-center justify-center mx-auto mb-6 text-[1.75rem]">
                   {f.icon}
@@ -130,11 +130,11 @@ export default function BerandaPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6 w-full max-w-6xl mx-auto px-2">
             {STEPS.map((s) => (
               <div
                 key={s.num}
-                className="w-full bg-white border border-grey-200 rounded-lg p-10 shadow-sm"
+                className="w-full bg-white border border-grey-200 rounded-lg p-3 md:p-6 shadow-sm"
               >
                 <div className="inline-flex items-center justify-center w-12 h-12 bg-brand-light text-white rounded-md font-bold text-[1.25rem] mb-6 shadow-sm">
                   {s.num}

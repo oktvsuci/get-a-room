@@ -14,18 +14,18 @@ export function Header() {
   const pathname = usePathname();
 
   return (
-    <header className="bg-white border-b border-grey-200 px-16 h-[100px] flex items-center justify-between sticky top-0 z-50 shadow-sm transition-all duration-300">
+    <header className="w-full flex flex-row items-center justify-between px-2 md:px-6 py-3 bg-white border-b border-grey-200 sticky top-0 z-50 shadow-sm transition-all duration-300">
 
-      <Link href="/" className="flex items-center gap-6">
-        <span className="font-display font-bold text-2xl text-brand">GAR</span>
-        <div className="flex items-center h-[50px] border-l-2 border-grey-200 pl-6">
-          <span className="text-sm font-semibold text-grey-500 tracking-wide">
+      <Link href="/" className="flex items-center gap-2 sm:gap-6">
+        <span className="font-display font-bold text-lg sm:text-2xl text-brand">GAR</span>
+        <div className="hidden sm:flex items-center h-[50px] border-l-2 border-grey-200 pl-3 sm:pl-6">
+          <span className="text-[10px] sm:text-sm font-semibold text-grey-500 tracking-wide">
             Telkom University
           </span>
         </div>
       </Link>
 
-      <nav className="flex items-center gap-2">
+      <nav className="flex flex-row items-center gap-1.5 md:gap-6 text-[10px] sm:text-xs md:text-base whitespace-nowrap">
         {NAV_LINKS.map(({ label, href }) => {
           const active = pathname === href;
           return (
@@ -33,7 +33,7 @@ export function Header() {
               key={href}
               href={href}
               className={[
-                "relative text-[0.95rem] font-semibold px-4 py-2 rounded-md transition-all duration-200",
+                "relative font-semibold px-4 py-2 rounded-md transition-all duration-200",
                 active
                   ? "text-brand bg-grey-100"
                   : "text-grey-600 hover:text-brand hover:bg-grey-100",
@@ -50,7 +50,7 @@ export function Header() {
         <Link
           href="/booking"
           className={[
-            "text-[0.95rem] font-semibold px-[1.4rem] py-[0.6rem] rounded-md bg-brand text-white shadow-sm transition-all duration-200 hover:bg-brand-dark hover:-translate-y-px hover:shadow-md",
+            "px-2 py-1 md:px-4 md:py-2 text-[10px] sm:text-xs md:text-sm rounded bg-brand text-white shadow-sm transition-all duration-200 hover:bg-brand-dark hover:-translate-y-px hover:shadow-md",
             pathname === "/booking" ? "ring-2 ring-brand ring-offset-2" : "",
           ].join(" ")}
         >

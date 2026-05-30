@@ -86,11 +86,11 @@ export default function PetunjukPage() {
       {/* ══════════════ STEPS ══════════════ */}
       <section className="px-16 py-16">
         <div className="max-w-[1100px] mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6 w-full max-w-6xl mx-auto px-2">
             {STEPS.map((s) => (
               <div
                 key={s.num}
-                className="bg-white border border-grey-200 rounded-lg p-10 shadow-sm flex flex-col"
+                className="bg-white border border-grey-200 rounded-lg p-6 sm:p-10 shadow-sm flex flex-col"
               >
                 <div className="inline-flex items-center justify-center w-12 h-12 bg-brand-light text-white rounded-md font-bold text-[1.25rem] mb-6 shadow-sm">
                   {s.num}
@@ -147,7 +147,7 @@ export default function PetunjukPage() {
               Pertanyaan yang sering ditanyakan seputar proses peminjaman
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-6xl mx-auto px-4">
+          <div className="grid grid-cols-2 gap-3 md:gap-6 w-full max-w-6xl mx-auto px-2">
             {FAQS.map((faq) => (
               <div
                 key={faq.q}
