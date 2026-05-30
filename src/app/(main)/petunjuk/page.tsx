@@ -86,7 +86,7 @@ export default function PetunjukPage() {
       {/* ══════════════ STEPS ══════════════ */}
       <section className="px-16 py-16">
         <div className="max-w-[1100px] mx-auto">
-          <div className="grid grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl mx-auto px-4">
             {STEPS.map((s) => (
               <div
                 key={s.num}
@@ -147,7 +147,7 @@ export default function PetunjukPage() {
               Pertanyaan yang sering ditanyakan seputar proses peminjaman
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-6xl mx-auto px-4">
             {FAQS.map((faq) => (
               <div
                 key={faq.q}

@@ -47,12 +47,8 @@ export default function LayananPage() {
       {/* ══════════════ PAGE HEADER ══════════════ */}
       <section className="bg-white border-b border-grey-200 px-16 py-12">
         <div className="max-w-[1100px] mx-auto">
-          <p className="text-xs font-bold tracking-widest text-brand uppercase mb-3">
-            Katalog Fasilitas
-          </p>
-          <h1 className="font-display text-[2.25rem] font-bold text-grey-900 mb-2">
-            Layanan Peminjaman
-          </h1>
+          <p className="text-xs font-bold tracking-widest text-brand uppercase mb-3">Katalog Fasilitas</p>
+          <h1 className="font-display text-[2.25rem] font-bold text-grey-900 mb-2">Layanan Peminjaman</h1>
           <p className="text-[1.05rem] text-grey-500 max-w-2xl">
             Pilih kategori fasilitas yang sesuai dengan kebutuhan kegiatan kamu.
             Setiap kategori memiliki alur persetujuan yang berbeda.
@@ -64,22 +60,20 @@ export default function LayananPage() {
       <section className="px-16 py-16">
         <div className="max-w-[1100px] mx-auto">
           <div className="text-center mb-12">
-            <h2 className="font-display text-[2.25rem] font-bold text-grey-900 mb-2">
-              Kategori Fasilitas
-            </h2>
+            <h2 className="font-display text-[2.25rem] font-bold text-grey-900 mb-2">Kategori Fasilitas</h2>
             <p className="text-[1.05rem] text-grey-500">
               Pilih direktorat atau tingkat administrasi fasilitas yang kamu butuhkan
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-10">
+          {/* Top 2 category cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-5xl mx-auto px-4">
             {KATEGORI.map((k) => (
               <Link
                 key={k.title}
                 href={k.href}
-                className="bg-white border border-grey-200 rounded-lg overflow-hidden shadow-sm cursor-pointer transition-all duration-300 hover:shadow-md hover:-translate-y-1 hover:border-grey-300 block"
+                className="w-full bg-white border border-grey-200 rounded-lg overflow-hidden shadow-sm cursor-pointer transition-all duration-300 hover:shadow-md hover:-translate-y-1 hover:border-grey-300 block"
               >
-                {/* Image area */}
                 <div
                   className={[
                     "h-[240px] flex items-center justify-center text-[5rem]",
@@ -91,17 +85,10 @@ export default function LayananPage() {
                   {k.icon}
                 </div>
 
-                {/* Content */}
                 <div className="p-8">
-                  <p className="text-xs font-bold tracking-widest text-brand uppercase mb-2">
-                    {k.label}
-                  </p>
-                  <h3 className="font-display text-[1.75rem] font-bold text-grey-900 mb-3">
-                    {k.title}
-                  </h3>
-                  <p className="text-[1rem] text-grey-600 leading-relaxed">
-                    {k.desc}
-                  </p>
+                  <p className="text-xs font-bold tracking-widest text-brand uppercase mb-2">{k.label}</p>
+                  <h3 className="font-display text-[1.75rem] font-bold text-grey-900 mb-3">{k.title}</h3>
+                  <p className="text-[1rem] text-grey-600 leading-relaxed">{k.desc}</p>
                 </div>
               </Link>
             ))}
@@ -112,27 +99,19 @@ export default function LayananPage() {
       {/* ══════════════ FASILITAS UNIVERSITAS ══════════════ */}
       <section className="px-16 pb-16 bg-grey-50">
         <div className="max-w-[1100px] mx-auto py-16">
-          <h2 className="font-display text-[1.75rem] font-bold text-grey-900 mb-2">
-            Fasilitas Universitas
-          </h2>
-          <p className="text-[0.95rem] text-grey-500 mb-10">
-            Dikelola oleh Direktorat Kemahasiswaan
-          </p>
-          <div className="grid grid-cols-3 gap-8">
+          <h2 className="font-display text-[1.75rem] font-bold text-grey-900 mb-2">Fasilitas Universitas</h2>
+          <p className="text-[0.95rem] text-grey-500 mb-10">Dikelola oleh Direktorat Kemahasiswaan</p>
+
+          {/* 3-card grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl mx-auto px-4">
             {FASILITAS_UNIV.map((f) => (
               <div
                 key={f.title}
-                className="bg-white border border-grey-200 rounded-lg p-10 shadow-sm flex flex-col transition-all duration-300 hover:shadow-md hover:border-grey-300 hover:-translate-y-0.5"
+                className="w-full bg-white border border-grey-200 rounded-lg p-10 shadow-sm flex flex-col transition-all duration-300 hover:shadow-md hover:border-grey-300 hover:-translate-y-0.5"
               >
-                <div className="w-14 h-14 bg-grey-100 rounded-md flex items-center justify-center text-[1.5rem] mb-6">
-                  {f.icon}
-                </div>
-                <h3 className="font-display text-[1.25rem] font-bold text-grey-900 mb-3">
-                  {f.title}
-                </h3>
-                <p className="text-[0.95rem] text-grey-600 leading-relaxed flex-1 mb-6">
-                  {f.desc}
-                </p>
+                <div className="w-14 h-14 bg-grey-100 rounded-md flex items-center justify-center text-[1.5rem] mb-6">{f.icon}</div>
+                <h3 className="font-display text-[1.25rem] font-bold text-grey-900 mb-3">{f.title}</h3>
+                <p className="text-[0.95rem] text-grey-600 leading-relaxed flex-1 mb-6">{f.desc}</p>
                 <Link
                   href="/booking"
                   className="w-full py-3 border border-brand rounded-md text-brand text-[0.95rem] font-semibold text-center transition-all duration-200 hover:bg-brand hover:text-white block"
@@ -148,21 +127,17 @@ export default function LayananPage() {
       {/* ══════════════ FASILITAS FAKULTAS ══════════════ */}
       <section className="px-16 pb-16">
         <div className="max-w-[1100px] mx-auto py-16">
-          <h2 className="font-display text-[1.75rem] font-bold text-grey-900 mb-2">
-            Fasilitas Fakultas
-          </h2>
-          <p className="text-[0.95rem] text-grey-500 mb-10">
-            Dikelola oleh Administrasi Fakultas masing-masing
-          </p>
-          <div className="grid grid-cols-3 gap-8">
+          <h2 className="font-display text-[1.75rem] font-bold text-grey-900 mb-2">Fasilitas Fakultas</h2>
+          <p className="text-[0.95rem] text-grey-500 mb-10">Dikelola oleh Administrasi Fakultas masing-masing</p>
+
+          {/* 3-card grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl mx-auto px-4">
             {FASILITAS_FAK.map((f) => (
               <div
                 key={f.title}
                 className={[
-                  "bg-white rounded-lg p-10 shadow-sm flex flex-col transition-all duration-300 hover:shadow-md hover:-translate-y-0.5",
-                  f.featured
-                    ? "border-2 border-brand"
-                    : "border border-grey-200 hover:border-grey-300",
+                  "w-full bg-white rounded-lg p-10 shadow-sm flex flex-col transition-all duration-300 hover:shadow-md hover:-translate-y-0.5",
+                  f.featured ? "border-2 border-brand" : "border border-grey-200 hover:border-grey-300",
                 ].join(" ")}
               >
                 <div
@@ -173,12 +148,8 @@ export default function LayananPage() {
                 >
                   {f.icon}
                 </div>
-                <h3 className="font-display text-[1.25rem] font-bold text-grey-900 mb-3">
-                  {f.title}
-                </h3>
-                <p className="text-[0.95rem] text-grey-600 leading-relaxed flex-1 mb-6">
-                  {f.desc}
-                </p>
+                <h3 className="font-display text-[1.25rem] font-bold text-grey-900 mb-3">{f.title}</h3>
+                <p className="text-[0.95rem] text-grey-600 leading-relaxed flex-1 mb-6">{f.desc}</p>
                 <Link
                   href="/booking"
                   className={[
@@ -200,12 +171,8 @@ export default function LayananPage() {
       <section className="px-16 pb-20 bg-grey-50">
         <div className="max-w-[1100px] mx-auto py-16">
           <div className="text-center mb-10">
-            <h2 className="font-display text-[2.25rem] font-bold text-grey-900 mb-2">
-              Syarat & Ketentuan
-            </h2>
-            <p className="text-[1.05rem] text-grey-500">
-              Wajib dipahami sebelum mengajukan peminjaman ruangan
-            </p>
+            <h2 className="font-display text-[2.25rem] font-bold text-grey-900 mb-2">Syarat & Ketentuan</h2>
+            <p className="text-[1.05rem] text-grey-500">Wajib dipahami sebelum mengajukan peminjaman ruangan</p>
           </div>
 
           <div className="bg-white border border-grey-200 rounded-lg p-10 shadow-sm">
@@ -234,3 +201,4 @@ export default function LayananPage() {
     </>
   );
 }
+

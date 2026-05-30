@@ -41,7 +41,6 @@ export default function BerandaPage() {
     <>
       {/* ══════════════ HERO ══════════════ */}
       <section className="relative min-h-[600px] flex items-center justify-center overflow-hidden">
-
         {/* Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-brand-dark via-brand to-grey-900" />
 
@@ -64,7 +63,8 @@ export default function BerandaPage() {
         <div className="relative z-10 text-center px-8 py-12 w-full max-w-[850px]">
           <div className="bg-white/5 border border-white/15 rounded-xl p-14 backdrop-blur-md shadow-lg">
             <h1 className="font-display text-5xl font-bold text-white leading-tight mb-5">
-              Reservasi Ruangan<br />
+              Reservasi Ruangan
+              <br />
               <span className="text-white/80">Telkom University</span>
             </h1>
             <p className="text-white/90 text-lg leading-relaxed mb-10 max-w-xl mx-auto">
@@ -100,11 +100,12 @@ export default function BerandaPage() {
               Solusi peminjaman ruangan yang dirancang untuk sivitas akademika Telkom University
             </p>
           </div>
-          <div className="grid grid-cols-3 gap-8">
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl mx-auto px-4">
             {FEATURES.map((f) => (
               <div
                 key={f.title}
-                className="bg-white border border-grey-200 rounded-lg p-10 text-center shadow-sm transition-all duration-300 hover:shadow-md hover:border-grey-300"
+                className="w-full bg-white border border-grey-200 rounded-lg p-10 text-center shadow-sm transition-all duration-300 hover:shadow-md hover:border-grey-300"
               >
                 <div className="w-16 h-16 bg-grey-100 text-brand rounded-md flex items-center justify-center mx-auto mb-6 text-[1.75rem]">
                   {f.icon}
@@ -128,11 +129,12 @@ export default function BerandaPage() {
               Tiga langkah mudah untuk mendapatkan ruangan yang kamu butuhkan
             </p>
           </div>
-          <div className="grid grid-cols-3 gap-8">
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl mx-auto px-4">
             {STEPS.map((s) => (
               <div
                 key={s.num}
-                className="bg-white border border-grey-200 rounded-lg p-10 shadow-sm"
+                className="w-full bg-white border border-grey-200 rounded-lg p-10 shadow-sm"
               >
                 <div className="inline-flex items-center justify-center w-12 h-12 bg-brand-light text-white rounded-md font-bold text-[1.25rem] mb-6 shadow-sm">
                   {s.num}
@@ -144,6 +146,7 @@ export default function BerandaPage() {
               </div>
             ))}
           </div>
+
           <div className="text-center mt-12">
             <Link
               href="/petunjuk"
@@ -157,3 +160,4 @@ export default function BerandaPage() {
     </>
   );
 }
+

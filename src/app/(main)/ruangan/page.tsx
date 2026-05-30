@@ -138,9 +138,9 @@ export default function RuanganPage() {
         </div>
       </section>
 
-      <div className="flex flex-col lg:flex-row flex-1 min-h-0">
+      <div className="flex flex-col lg:flex-row gap-6 w-full max-w-7xl mx-auto px-4">
         {/* ══════════════ SIDEBAR FILTER ══════════════ */}
-        <aside className="w-full lg:w-[300px] lg:border-r border-grey-200 p-6 sm:p-10 bg-white sticky top-[100px] lg:h-fit">
+        <aside className="w-full lg:w-1/4 border-grey-200 p-6 sm:p-10 bg-white sticky top-[100px] lg:h-fit lg:border-r">
           <p className="text-xs font-bold tracking-widest text-grey-500 uppercase mb-6">
             Filter Ruangan
           </p>
@@ -250,7 +250,7 @@ export default function RuanganPage() {
               <p className="text-grey-500 text-sm">Coba ubah filter atau kata kunci pencarian.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full lg:w-3/4">
               {filtered.map((r) => {
                 const cfg = STATUS_CONFIG[r.status as keyof typeof STATUS_CONFIG];
                 const bisa = r.status === "tersedia";
