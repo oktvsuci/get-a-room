@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { step2Schema, type Step2Fields } from "@/lib/validations/booking.schema";
@@ -24,24 +24,30 @@ function FieldError({ message }: { message?: string }) {
   );
 }
 
-const RUANGAN_OPTIONS = [
-  "TUCH Convention Hall",
-  "GSG Aula Besar",
-  "TULT Auditorium Lt. 16",
-  "TULT R. Rapat 1601",
-  "TULT Aula Lt. 2",
-  "Selaru Aula FIT",
-  "Batek Mulmed A",
-  "Sebatik Aula FIK",
-  "Sport Center Basket",
-];
+type RoomOption = { id: string; label: string; isAvailable: boolean; needsPermit: boolean };
 
 export function Step2Kegiatan({ data, update }: StepProps) {
-  const {
-    register,
-    watch,
-    formState: { errors },
-  } = useForm<Step2Fields>({
+  const [rooms, setRooms] = useState<RoomOption[]>([]);
+  const [loadingRooms, setLoadingRooms] = useState(true);
+
+  // Fetch rooms dari API
+  useEffect(() => {
+    fetch("/api/rooms")
+      .then((r) => r.json())
+      .then(({ rooms: rawRooms }) => {
+        setRooms(
+          rawRooms.map((r: { id: string; namaGedung: string; nomorRuangan: string; isAvailable: boolean; needsPermit: boolean }) => ({
+            id: r.id,
+            label: `${r.namaGedung} — ${r.nomorRuangan}`,
+            isAvailable: r.isAvailable,
+            needsPermit: r.needsPermit,
+          }))
+        );
+      })
+      .finally(() => setLoadingRooms(false));
+  }, []);
+
+  const { register, watch, formState: { errors } } = useForm<Step2Fields>({
     resolver: zodResolver(step2Schema),
     defaultValues: {
       instansi:   data.instansi,
@@ -55,7 +61,6 @@ export function Step2Kegiatan({ data, update }: StepProps) {
     mode: "onTouched",
   });
 
-  // Sync nilai RHF → BookingWizard state
   useEffect(() => {
     const subscription = watch((values) => {
       update({
@@ -73,113 +78,75 @@ export function Step2Kegiatan({ data, update }: StepProps) {
 
   return (
     <div>
-      <h2 className="text-[1.5rem] font-bold text-grey-900 mb-1">
-        Detail Kegiatan
-      </h2>
+      <h2 className="text-[1.5rem] font-bold text-grey-900 mb-1">Detail Kegiatan</h2>
       <p className="text-[0.95rem] text-grey-500 mb-10">
         Isi informasi kegiatan dan pilih ruangan yang dibutuhkan.
       </p>
 
       <div className="grid grid-cols-2 gap-6">
-
         {/* Instansi */}
         <div className="flex flex-col gap-1.5">
-          <label className={labelClass}>
-            Instansi / Organisasi <span className="text-brand">*</span>
-          </label>
-          <input
-            type="text"
-            placeholder="Contoh: Himpunan Mahasiswa IF"
-            className={errors.instansi ? inputError : inputNormal}
-            {...register("instansi")}
-          />
+          <label className={labelClass}>Instansi / Organisasi <span className="text-brand">*</span></label>
+          <input type="text" placeholder="Contoh: Himpunan Mahasiswa IF"
+            className={errors.instansi ? inputError : inputNormal} {...register("instansi")} />
           <FieldError message={errors.instansi?.message} />
         </div>
 
         {/* Jabatan */}
         <div className="flex flex-col gap-1.5">
-          <label className={labelClass}>
-            Jabatan Pemohon <span className="text-brand">*</span>
-          </label>
-          <input
-            type="text"
-            placeholder="Contoh: Ketua Panitia"
-            className={errors.jabatan ? inputError : inputNormal}
-            {...register("jabatan")}
-          />
+          <label className={labelClass}>Jabatan Pemohon <span className="text-brand">*</span></label>
+          <input type="text" placeholder="Contoh: Ketua Panitia"
+            className={errors.jabatan ? inputError : inputNormal} {...register("jabatan")} />
           <FieldError message={errors.jabatan?.message} />
         </div>
 
-        {/* Ruangan */}
+        {/* Ruangan — dari DB */}
         <div className="flex flex-col gap-1.5 col-span-2">
-          <label className={labelClass}>
-            Pilih Ruangan <span className="text-brand">*</span>
-          </label>
-          <select
-            className={errors.ruangan ? inputError : inputNormal}
-            {...register("ruangan")}
-          >
-            <option value="">-- Pilih Ruangan --</option>
-            {RUANGAN_OPTIONS.map((r) => (
-              <option key={r} value={r}>{r}</option>
-            ))}
-          </select>
+          <label className={labelClass}>Pilih Ruangan <span className="text-brand">*</span></label>
+          {loadingRooms ? (
+            <div className={`${inputNormal} text-grey-400`}>Memuat daftar ruangan...</div>
+          ) : (
+            <select className={errors.ruangan ? inputError : inputNormal} {...register("ruangan")}>
+              <option value="">-- Pilih Ruangan --</option>
+              {rooms.map((r) => (
+                <option key={r.id} value={r.id} disabled={!r.isAvailable}>
+                  {r.label}
+                  {!r.isAvailable ? " (Tidak Tersedia)" : r.needsPermit ? " (Perlu Izin)" : ""}
+                </option>
+              ))}
+            </select>
+          )}
           <FieldError message={errors.ruangan?.message} />
         </div>
 
         {/* Tanggal */}
         <div className="flex flex-col gap-1.5">
-          <label className={labelClass}>
-            Tanggal Kegiatan <span className="text-brand">*</span>
-          </label>
-          <input
-            type="date"
-            className={errors.tanggal ? inputError : inputNormal}
-            {...register("tanggal")}
-          />
+          <label className={labelClass}>Tanggal Kegiatan <span className="text-brand">*</span></label>
+          <input type="date" className={errors.tanggal ? inputError : inputNormal} {...register("tanggal")} />
           <FieldError message={errors.tanggal?.message} />
         </div>
 
         {/* Jam Mulai */}
         <div className="flex flex-col gap-1.5">
-          <label className={labelClass}>
-            Jam Mulai <span className="text-brand">*</span>
-          </label>
-          <input
-            type="time"
-            className={errors.jamMulai ? inputError : inputNormal}
-            {...register("jamMulai")}
-          />
+          <label className={labelClass}>Jam Mulai <span className="text-brand">*</span></label>
+          <input type="time" className={errors.jamMulai ? inputError : inputNormal} {...register("jamMulai")} />
           <FieldError message={errors.jamMulai?.message} />
         </div>
 
         {/* Jam Selesai */}
         <div className="flex flex-col gap-1.5">
-          <label className={labelClass}>
-            Jam Selesai <span className="text-brand">*</span>
-          </label>
-          <input
-            type="time"
-            className={errors.jamSelesai ? inputError : inputNormal}
-            {...register("jamSelesai")}
-          />
+          <label className={labelClass}>Jam Selesai <span className="text-brand">*</span></label>
+          <input type="time" className={errors.jamSelesai ? inputError : inputNormal} {...register("jamSelesai")} />
           <FieldError message={errors.jamSelesai?.message} />
         </div>
 
         {/* Detail Kegiatan */}
         <div className="flex flex-col gap-1.5 col-span-2">
-          <label className={labelClass}>
-            Detail Kegiatan <span className="text-brand">*</span>
-          </label>
-          <textarea
-            rows={4}
-            placeholder="Jelaskan nama kegiatan, tujuan, dan perkiraan jumlah peserta..."
-            className={errors.kegiatan ? inputError : inputNormal}
-            {...register("kegiatan")}
-          />
+          <label className={labelClass}>Detail Kegiatan <span className="text-brand">*</span></label>
+          <textarea rows={4} placeholder="Jelaskan nama kegiatan, tujuan, dan perkiraan jumlah peserta..."
+            className={errors.kegiatan ? inputError : inputNormal} {...register("kegiatan")} />
           <FieldError message={errors.kegiatan?.message} />
         </div>
-
       </div>
     </div>
   );
