@@ -30,7 +30,6 @@ export function Step2Kegiatan({ data, update }: StepProps) {
   const [rooms, setRooms] = useState<RoomOption[]>([]);
   const [loadingRooms, setLoadingRooms] = useState(true);
 
-  // Fetch rooms dari API
   useEffect(() => {
     fetch("/api/rooms")
       .then((r) => r.json())
@@ -66,11 +65,12 @@ export function Step2Kegiatan({ data, update }: StepProps) {
       update({
         instansi:   values.instansi   ?? "",
         jabatan:    values.jabatan    ?? "",
-        ruangan:    values.ruangan    ?? "",
         tanggal:    values.tanggal    ?? "",
         jamMulai:   values.jamMulai   ?? "",
         jamSelesai: values.jamSelesai ?? "",
         kegiatan:   values.kegiatan   ?? "",
+        // ruangan & roomId TIDAK di-update dari watch,
+        // karena dihandle manual di onChange dropdown
       });
     });
     return () => subscription.unsubscribe();
@@ -100,13 +100,23 @@ export function Step2Kegiatan({ data, update }: StepProps) {
           <FieldError message={errors.jabatan?.message} />
         </div>
 
-        {/* Ruangan — dari DB */}
+        {/* Ruangan — fix: simpan id ke roomId, label ke ruangan */}
         <div className="flex flex-col gap-1.5 col-span-2">
           <label className={labelClass}>Pilih Ruangan <span className="text-brand">*</span></label>
           {loadingRooms ? (
             <div className={`${inputNormal} text-grey-400`}>Memuat daftar ruangan...</div>
           ) : (
-            <select className={errors.ruangan ? inputError : inputNormal} {...register("ruangan")}>
+            <select
+              className={data.roomId === "" && errors.ruangan ? inputError : inputNormal}
+              value={data.roomId}
+              onChange={(e) => {
+                const selected = rooms.find((r) => r.id === e.target.value);
+                update({
+                  roomId:  selected?.id    ?? "",
+                  ruangan: selected?.label ?? "",
+                });
+              }}
+            >
               <option value="">-- Pilih Ruangan --</option>
               {rooms.map((r) => (
                 <option key={r.id} value={r.id} disabled={!r.isAvailable}>
@@ -116,7 +126,9 @@ export function Step2Kegiatan({ data, update }: StepProps) {
               ))}
             </select>
           )}
-          <FieldError message={errors.ruangan?.message} />
+          {data.roomId === "" && errors.ruangan && (
+            <FieldError message={errors.ruangan?.message} />
+          )}
         </div>
 
         {/* Tanggal */}

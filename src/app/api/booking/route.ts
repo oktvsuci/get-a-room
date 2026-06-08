@@ -19,10 +19,8 @@ export async function POST(req: NextRequest) {
     const jamSelesai = formData.get("jamSelesai") as string;
     const kegiatan   = formData.get("kegiatan")   as string;
 
-    // Satu instance supabase server untuk semua operasi
     const supabase = await createServerClient();
 
-    // Ambil userId dari session (opsional)
     let userId: string | null = null;
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -31,7 +29,7 @@ export async function POST(req: NextRequest) {
       // Tidak login — lanjutkan tanpa userId
     }
 
-    // Validasi room ada dan tersedia
+    // Validasi room
     const room = await prisma.room.findUnique({ where: { id: roomId } });
     if (!room) {
       return NextResponse.json({ success: false, message: "Ruangan tidak ditemukan." }, { status: 400 });

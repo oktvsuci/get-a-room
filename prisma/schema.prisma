@@ -68,3 +68,27 @@ model Booking {
   // Catatan admin saat approve/reject
   catatanAdmin String?
 }
+
+// Tambahkan di bawah model Booking
+
+model Notification {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  userId    String
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  type      String   @default("info") // "info" | "approved" | "rejected"
+  bookingId String?
+}
+
+model Profile {
+  id        String   @id @default(cuid())
+  updatedAt DateTime @updatedAt
+
+  userId    String   @unique
+  nama      String
+  hp        String   @default("")
+  nim       String   @default("")
+}
