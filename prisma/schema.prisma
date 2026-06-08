@@ -1,5 +1,3 @@
-// prisma/schema.prisma
-
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["driverAdapters"]
@@ -11,11 +9,18 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+<<<<<<< HEAD
 // ─── Room ────────────────────────────────────────────────
 model Room {
   id           String   @id @default(cuid())
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+=======
+model Room {
+  id           String    @id @default(cuid())
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+>>>>>>> 8947d3de26fd1574f5b41bbc7dad5d9074bd1393
   namaGedung   String
   nomorRuangan String
   kategori     String
@@ -23,13 +28,21 @@ model Room {
   kapasitas    Int
   fasilitas    String[]
   fotoUrl      String?
+<<<<<<< HEAD
   isAvailable  Boolean  @default(true)
   needsPermit  Boolean  @default(false)
+=======
+  isAvailable  Boolean   @default(true)
+  needsPermit  Boolean   @default(false)
+>>>>>>> 8947d3de26fd1574f5b41bbc7dad5d9074bd1393
   keterangan   String?
   bookings     Booking[]
 }
 
+<<<<<<< HEAD
 // ─── Booking ─────────────────────────────────────────────
+=======
+>>>>>>> 8947d3de26fd1574f5b41bbc7dad5d9074bd1393
 model Booking {
   id           String   @id @default(cuid())
   createdAt    DateTime @default(now())
@@ -40,9 +53,12 @@ model Booking {
   hp           String
   instansi     String
   jabatan      String
+<<<<<<< HEAD
   roomId       String
   room         Room     @relation(fields: [roomId], references: [id])
   userId       String?
+=======
+>>>>>>> 8947d3de26fd1574f5b41bbc7dad5d9074bd1393
   tanggal      String
   jamMulai     String
   jamSelesai   String
@@ -50,8 +66,12 @@ model Booking {
   fileSuratUrl String
   status       String   @default("pending")
   catatanAdmin String?
+  roomId       String
+  userId       String?
+  room         Room     @relation(fields: [roomId], references: [id])
 }
 
+<<<<<<< HEAD
 // ─── Notification (BARU) ─────────────────────────────────
 model Notification {
   id        String   @id @default(cuid())
@@ -71,10 +91,31 @@ model Notification {
   href      String   @default("/dashboard/peminjaman")
 
   // Referensi ke booking terkait (opsional)
+=======
+model Notification {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  userId    String
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  type      String   @default("info")
+>>>>>>> 8947d3de26fd1574f5b41bbc7dad5d9074bd1393
   bookingId String?
 
+<<<<<<< HEAD
   isRead    Boolean  @default(false)
 
   @@index([userId])           // Query notif by user sangat cepat
   @@index([userId, isRead])   // Query unread count sangat cepat
 }
+=======
+model Profile {
+  id        String   @id @default(cuid())
+  updatedAt DateTime @updatedAt
+  userId    String   @unique
+  nama      String
+  hp        String   @default("")
+  nim       String   @default("")
+}
+>>>>>>> 8947d3de26fd1574f5b41bbc7dad5d9074bd1393

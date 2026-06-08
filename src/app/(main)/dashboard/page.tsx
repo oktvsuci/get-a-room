@@ -59,7 +59,7 @@ export default async function DashboardPage() {
         </Link>
 
         <Link
-          href="/dashboard/profil"
+          href="/profil"
           className="group flex items-start gap-4 p-6 bg-white border border-grey-200 rounded-xl shadow-sm hover:border-brand hover:shadow-md transition-all hover:-translate-y-0.5"
         >
           <span className="text-3xl">👤</span>
