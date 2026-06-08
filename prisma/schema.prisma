@@ -1,5 +1,3 @@
-// prisma/schema.prisma
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,83 +8,59 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// ─── Model Room (BARU) ────────────────────────────────────
 model Room {
-  id          String   @id @default(cuid())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  namaGedung  String               // "TULT", "GSG", "TUCH"
-  nomorRuangan String              // "Auditorium Lt.16", "R. Rapat 1601"
-  kategori    String               // "Universitas" | "Fakultas"
-  lantai      String               // "1", "16", "2"
-  kapasitas   Int
-  fasilitas   String[]             // ["AC", "Proyektor", "WiFi"]
-  fotoUrl     String?              // URL ke Supabase Storage (opsional)
-
-  // "available" | "unavailable" | "needs_permit"
-  // Admin set ini manual jika ruangan rusak/renovasi
-  isAvailable Boolean  @default(true)
-  needsPermit Boolean  @default(false)
-  keterangan  String?              // Catatan admin jika unavailable
-
-  bookings    Booking[]            // Relasi ke Booking
+  id           String    @id @default(cuid())
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  namaGedung   String
+  nomorRuangan String
+  kategori     String
+  lantai       String
+  kapasitas    Int
+  fasilitas    String[]
+  fotoUrl      String?
+  isAvailable  Boolean   @default(true)
+  needsPermit  Boolean   @default(false)
+  keterangan   String?
+  bookings     Booking[]
 }
 
-// ─── Model Booking (Update — tambah relasi ke Room) ───────
 model Booking {
   id           String   @id @default(cuid())
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-
-  // Data pemohon
   nama         String
   nim          String
   email        String
   hp           String
   instansi     String
   jabatan      String
-
-  // Relasi ke Room (ganti field ruangan: String lama)
-  roomId       String
-  room         Room     @relation(fields: [roomId], references: [id])
-
-  // User yang membuat booking (dari Supabase Auth)
-  userId       String?
-
-  // Jadwal
   tanggal      String
   jamMulai     String
   jamSelesai   String
-
-  // Detail
   kegiatan     String
   fileSuratUrl String
   status       String   @default("pending")
-  // "pending" | "approved" | "rejected"
-
-  // Catatan admin saat approve/reject
   catatanAdmin String?
+  roomId       String
+  userId       String?
+  room         Room     @relation(fields: [roomId], references: [id])
 }
-
-// Tambahkan di bawah model Booking
 
 model Notification {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
-
   userId    String
   title     String
   message   String
   isRead    Boolean  @default(false)
-  type      String   @default("info") // "info" | "approved" | "rejected"
+  type      String   @default("info")
   bookingId String?
 }
 
 model Profile {
   id        String   @id @default(cuid())
   updatedAt DateTime @updatedAt
-
   userId    String   @unique
   nama      String
   hp        String   @default("")
