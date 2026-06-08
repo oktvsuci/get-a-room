@@ -79,7 +79,7 @@ export function BookingList({ initialBookings }: { initialBookings: Booking[] })
         <div className="text-6xl mb-4">📭</div>
         <h3 className="font-display text-xl font-bold text-grey-900 mb-2">Belum Ada Pengajuan</h3>
         <p className="text-grey-500 text-sm mb-6">Kamu belum pernah mengajukan peminjaman ruangan.</p>
-        
+        <a
           href="/booking"
           className="px-6 py-2.5 bg-brand text-white text-sm font-semibold rounded-md hover:bg-brand-dark transition-all"
         >
@@ -122,7 +122,7 @@ export function BookingList({ initialBookings }: { initialBookings: Booking[] })
           </div>
         ) : filtered.map((booking) => {
           const cfg   = STATUS_CFG[booking.status] ?? STATUS_CFG.pending;
-          const isPending = booking.status === "pending";
+          const isPendingAction = booking.status === "pending";
 
           return (
             <div
@@ -169,7 +169,7 @@ export function BookingList({ initialBookings }: { initialBookings: Booking[] })
 
                   {/* Actions */}
                   <div className="flex sm:flex-col gap-2 sm:items-end flex-shrink-0">
-                    
+                    <a
                       href={booking.fileSuratUrl}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -178,7 +178,7 @@ export function BookingList({ initialBookings }: { initialBookings: Booking[] })
                       Lihat Surat
                     </a>
 
-                    {isPending && (
+                    {isPendingAction && (
                       <>
                         <button
                           onClick={() => setEditTarget(booking)}
