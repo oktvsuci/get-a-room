@@ -5,31 +5,27 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import type { User } from "@supabase/supabase-js";
 
 const NAV_LINKS = [
   { label: "Beranda",      href: "/" },
-  { label: "Petunjuk",    href: "/petunjuk" },
-  { label: "Layanan",     href: "/layanan" },
-  { label: "Cek Ruangan", href: "/ruangan" },
+  { label: "Petunjuk",     href: "/petunjuk" },
+  { label: "Layanan",      href: "/layanan" },
+  { label: "Cek Ruangan",  href: "/ruangan" },
 ];
 
 export function Header() {
   const pathname = usePathname();
-  const router = useRouter();
+  const router   = useRouter();
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     const supabase = createClient();
-
-    // Ambil user saat ini
     supabase.auth.getUser().then(({ data }) => setUser(data.user));
-
-    // Dengarkan perubahan auth state (login/logout)
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: listener } = supabase.auth.onAuthStateChange((_e, session) => {
       setUser(session?.user ?? null);
     });
-
     return () => listener.subscription.unsubscribe();
   }, []);
 
@@ -44,7 +40,6 @@ export function Header() {
 
   return (
     <header className="w-full flex flex-row items-center justify-between px-2 md:px-6 py-3 bg-white border-b border-grey-200 sticky top-0 z-50 shadow-sm transition-all duration-300">
-
       <Link href="/" className="flex items-center gap-2 sm:gap-6">
         <span className="font-display font-bold text-lg sm:text-2xl text-brand">GAR</span>
         <div className="hidden sm:flex items-center h-[50px] border-l-2 border-grey-200 pl-3 sm:pl-6">
@@ -77,8 +72,10 @@ export function Header() {
         })}
 
         {user ? (
-          // Sudah login: tampilkan avatar/nama + menu
           <div className="flex items-center gap-2 md:gap-3">
+            {/* ── Notification Bell ── */}
+            <NotificationBell userId={user.id} />
+
             {isAdmin && (
               <Link
                 href="/admin"
@@ -101,7 +98,6 @@ export function Header() {
             </button>
           </div>
         ) : (
-          // Belum login: tampilkan tombol Login + Booking
           <div className="flex items-center gap-2">
             <Link
               href="/login"

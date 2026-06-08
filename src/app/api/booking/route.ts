@@ -2,6 +2,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createClient as createServerClient } from "@/lib/supabase/server";
+import { notifyAdmins } from "@/lib/notifications";
+
 
 export async function POST(req: NextRequest) {
   try {
@@ -90,4 +92,28 @@ export async function POST(req: NextRequest) {
     console.error("BOOKING ERROR:", error);
     return NextResponse.json({ success: false, message: String(error) }, { status: 500 });
   }
+
+  const booking = await prisma.booking.create({
+      data: {
+        nama, nim, email, hp, instansi, jabatan,
+        roomId, tanggal, jamMulai, jamSelesai, kegiatan,
+        fileSuratUrl: urlData.publicUrl,
+        userId,
+      },
+      include: { room: true },  // ← tambah include
+    });
+
+    // ── Trigger notifikasi ke admin ──────────────────────
+    await notifyAdmins({
+      type:      "booking_submitted",
+      bookingId: booking.id,
+      roomLabel: `${booking.room.namaGedung} — ${booking.room.nomorRuangan}`,
+      tanggal:   booking.tanggal,
+      jamMulai:  booking.jamMulai,
+      jamSelesai:booking.jamSelesai,
+      nama:      booking.nama,
+    });
+    // ────────────────────────────────────────────────────
+
+    return NextResponse.json({ success: true, bookingId: booking.id }, { status: 201 });
 }

@@ -24,7 +24,9 @@ export default async function AdminLayout({
 
   return (
     <div className="flex min-h-screen bg-grey-50">
-      <AdminSidebar adminNama={nama} adminEmail={user.email ?? ""} />
+      <AdminSidebar adminNama={nama} 
+      adminEmail={user.email ?? ""}
+      adminId={user.id} />
 
       {/* Main content area */}
       <div className="flex-1 flex flex-col min-w-0">

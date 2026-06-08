@@ -5,19 +5,28 @@ import { createClient } from "@/lib/supabase/server";
 
 // GET /api/rooms — ambil semua ruangan (publik, untuk halaman /ruangan)
 export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const gedung   = searchParams.get("gedung");
-  const kategori = searchParams.get("kategori");
+  try {
+    const { searchParams } = new URL(req.url);
+    const gedung   = searchParams.get("gedung");
+    const kategori = searchParams.get("kategori");
 
-  const rooms = await prisma.room.findMany({
-    where: {
-      ...(gedung   ? { namaGedung: gedung }   : {}),
-      ...(kategori ? { kategori }              : {}),
-    },
-    orderBy: [{ namaGedung: "asc" }, { nomorRuangan: "asc" }],
-  });
+    const rooms = await prisma.room.findMany({
+      where: {
+        ...(gedung   ? { namaGedung: gedung } : {}),
+        ...(kategori ? { kategori }           : {}),
+      },
+      orderBy: [{ namaGedung: "asc" }, { nomorRuangan: "asc" }],
+    });
 
-  return NextResponse.json({ rooms });
+    return NextResponse.json({ rooms });
+
+  } catch (error) {
+    console.error("GET /api/rooms error:", error);
+    return NextResponse.json(
+      { error: "Gagal mengambil data ruangan.", rooms: [] },
+      { status: 500 }
+    );
+  }
 }
 
 // POST /api/rooms — tambah ruangan baru (admin only)
