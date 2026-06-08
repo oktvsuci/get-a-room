@@ -1,3 +1,4 @@
+// src/app/api/booking/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
@@ -5,31 +6,35 @@ import { createClient } from "@/lib/supabase/server";
 // DELETE — cancel booking (hanya jika pending & milik user)
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params; // Perbaikan Next.js: params harus di-await
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const booking = await prisma.booking.findUnique({ where: { id: params.id } });
+  const booking = await prisma.booking.findUnique({ where: { id } });
   if (!booking) return NextResponse.json({ error: "Booking tidak ditemukan." }, { status: 404 });
   if (booking.userId !== user.id) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   if (booking.status !== "pending") return NextResponse.json({ error: "Hanya booking pending yang bisa dibatalkan." }, { status: 400 });
 
-  await prisma.booking.delete({ where: { id: params.id } });
+  await prisma.booking.delete({ where: { id } });
   return NextResponse.json({ success: true });
 }
 
 // PATCH — edit booking (hanya jika pending & milik user)
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params; // Perbaikan Next.js: params harus di-await
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const booking = await prisma.booking.findUnique({ where: { id: params.id } });
+  const booking = await prisma.booking.findUnique({ where: { id } });
   if (!booking) return NextResponse.json({ error: "Booking tidak ditemukan." }, { status: 404 });
   if (booking.userId !== user.id) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   if (booking.status !== "pending") return NextResponse.json({ error: "Hanya booking pending yang bisa diedit." }, { status: 400 });
@@ -37,7 +42,7 @@ export async function PATCH(
   const body = await req.json();
 
   const updated = await prisma.booking.update({
-    where: { id: params.id },
+    where: { id },
     data: {
       roomId:     body.roomId     ?? booking.roomId,
       tanggal:    body.tanggal    ?? booking.tanggal,
