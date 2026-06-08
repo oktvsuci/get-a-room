@@ -30,7 +30,7 @@ type Booking = {
 const STATUS_CFG = {
   pending:  { label: "Menunggu", bg: "bg-yellow-50", text: "text-yellow-700", border: "border-yellow-200", dot: "bg-yellow-400" },
   approved: { label: "Disetujui", bg: "bg-green-50",  text: "text-green-700",  border: "border-green-200",  dot: "bg-green-500"  },
-  rejected: { label: "Ditolak",   bg: "bg-red-50",    text: "text-red-700",    border: "border-red-200",    dot: "bg-red-500"    },
+  rejected: { label: "Ditolak",   bg: "bg-red-50",     text: "text-red-700",    border: "border-red-200",    dot: "bg-red-500"    },
 } as const;
 
 type Props = {
@@ -275,13 +275,12 @@ export function AdminBookingTable({ initialBookings, initialTotal, rooms }: Prop
             ) : (
               bookings.map((b) => {
                 const cfg       = STATUS_CFG[b.status as keyof typeof STATUS_CFG] ?? STATUS_CFG.pending;
-                const isPending = b.status === "pending";
+                const isPendingAction = b.status === "pending";
                 const expanded  = expandedId === b.id;
 
                 return (
-                  <>
+                  <React.Fragment key={b.id}>
                     <tr
-                      key={b.id}
                       className={["hover:bg-grey-50 transition-colors cursor-pointer", expanded ? "bg-grey-50" : ""].join(" ")}
                       onClick={() => setExpandedId(expanded ? null : b.id)}
                     >
@@ -313,7 +312,7 @@ export function AdminBookingTable({ initialBookings, initialTotal, rooms }: Prop
                           className="flex items-center gap-1.5 justify-end"
                           onClick={(e) => e.stopPropagation()}
                         >
-                          {isPending && (
+                          {isPendingAction && (
                             <>
                               <button
                                 onClick={() => openAction(b, "approve")}
@@ -341,7 +340,7 @@ export function AdminBookingTable({ initialBookings, initialTotal, rooms }: Prop
 
                     {/* Expanded detail row */}
                     {expanded && (
-                      <tr key={`${b.id}-expanded`} className="bg-grey-50 border-t border-grey-100">
+                      <tr className="bg-grey-50 border-t border-grey-100">
                         <td colSpan={5} className="px-6 py-5">
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                             <div>
@@ -368,7 +367,7 @@ export function AdminBookingTable({ initialBookings, initialTotal, rooms }: Prop
                             </div>
                             {b.fileSuratUrl && (
                               <div className="col-span-2 md:col-span-4">
-                                
+                                <a
                                   href={b.fileSuratUrl}
                                   target="_blank"
                                   rel="noopener noreferrer"
@@ -382,7 +381,7 @@ export function AdminBookingTable({ initialBookings, initialTotal, rooms }: Prop
                         </td>
                       </tr>
                     )}
-                  </>
+                  </React.Fragment>
                 );
               })
             )}
@@ -449,7 +448,7 @@ export function AdminBookingTable({ initialBookings, initialTotal, rooms }: Prop
                 </div>
               </div>
 
-              {/* Catatan admin — wajib untuk reject, opsional untuk approve */}
+              {/* Catatan admin */}
               {(actionType === "approve" || actionType === "reject") && (
                 <div className="mb-4">
                   <label className="block text-sm font-semibold text-grey-700 mb-1.5">
@@ -527,3 +526,4 @@ export function AdminBookingTable({ initialBookings, initialTotal, rooms }: Prop
     </>
   );
 }
+import React from "react";
