@@ -26,7 +26,7 @@ async function getBookingForUser(bookingId: string) {
   return { error: null, status: 200, booking, user };
 }
 
-// PATCH /api/booking/[id] — edit booking (hanya jika status pending)
+// PATCH /api/booking/[id] — edit booking (atau update status oleh admin)
 export async function PATCH(req: NextRequest, { params }: Params) {
   const { id } = await params;
   const { error, status, booking } = await getBookingForUser(id);
@@ -35,14 +35,47 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     return NextResponse.json({ error }, { status });
   }
 
+  const body = await req.json();
+
+  // Jika yang masuk adalah update status (biasanya dari aksi Admin)
+  if (body.status && body.status !== booking.status) {
+    const updated = await prisma.booking.update({
+      where: { id },
+      data: {
+        status: body.status,
+        ...(body.catatanAdmin !== undefined && { catatanAdmin: body.catatanAdmin }),
+      },
+      include: { room: true },
+    });
+
+    // Pemicu Notifikasi Real-time jika data userId tersedia
+    if (updated.userId) {
+      const isApproved = updated.status === "approved";
+      const icon = isApproved ? "🎉" : "❌";
+
+      await prisma.notification.create({
+        data: {
+          userId: updated.userId,
+          bookingId: updated.id,
+          title: `Peminjaman ${isApproved ? "Disetujui" : "Ditolak"} ${icon}`,
+          message: isApproved
+            ? `Pengajuan peminjaman ruangan ${updated.room.namaGedung} (${updated.room.nomorRuangan}) untuk tanggal ${updated.tanggal} telah disetujui.`
+            : `Mohon maaf, pengajuan peminjaman ruangan Anda ditolak. Catatan: ${updated.catatanAdmin || "-"}`,
+          type: isApproved ? "success" : "error",
+        },
+      });
+    }
+
+    return NextResponse.json({ booking: updated });
+  }
+
+  // VALIDASI AWAL USER: Hanya booking dengan status Pending yang dapat diedit oleh user biasa
   if (booking.status !== "pending") {
     return NextResponse.json(
       { error: "Hanya booking dengan status Pending yang dapat diedit." },
       { status: 409 }
     );
   }
-
-  const body = await req.json();
 
   // Jika ganti ruangan atau jadwal, cek konflik dulu
   const roomId     = body.roomId     ?? booking.roomId;

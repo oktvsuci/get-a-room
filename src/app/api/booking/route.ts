@@ -84,6 +84,19 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Notifikasi booking masuk
+    if (userId) {
+      await prisma.notification.create({
+        data: {
+          userId,
+          bookingId: booking.id,
+          title: "Pengajuan Dikirim ✅",
+          message: `Pengajuan peminjaman ruangan ${room.namaGedung} (${room.nomorRuangan}) untuk tanggal ${tanggal} sedang diproses admin.`,
+          type: "info",
+        },
+      });
+    }
+
     return NextResponse.json({ success: true, bookingId: booking.id }, { status: 201 });
 
   } catch (error) {

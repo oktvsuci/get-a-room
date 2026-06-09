@@ -66,3 +66,15 @@ model Profile {
   hp        String   @default("")
   nim       String   @default("")
 }
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String   // Diarahkan ke user yang menerima notifikasi
+  title     String   // Contoh: "Peminjaman Disetujui 🎉" atau "Peminjaman Ditolak ❌"
+  message   String   // Contoh: "Pengajuan ruangan Aula Gedung A telah disetujui oleh admin."
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  // Jika kamu punya relasi ke model User, bisa ditambahkan di sini
+  // user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

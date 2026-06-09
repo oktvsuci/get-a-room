@@ -1,4 +1,3 @@
-// src/components/layout/Header.tsx
 "use client";
 
 import Link from "next/link";
@@ -6,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
+import { NotificationBell } from "./NotificationBell";
 
 const NAV_LINKS = [
   { label: "Beranda",      href: "/" },
@@ -22,10 +22,8 @@ export function Header() {
   useEffect(() => {
     const supabase = createClient();
 
-    // Ambil user saat ini
     supabase.auth.getUser().then(({ data }) => setUser(data.user));
 
-    // Dengarkan perubahan auth state (login/logout)
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
@@ -77,7 +75,6 @@ export function Header() {
         })}
 
         {user ? (
-          // Sudah login: tampilkan avatar/nama + menu
           <div className="flex items-center gap-2 md:gap-3">
             {isAdmin && (
               <Link
@@ -87,6 +84,7 @@ export function Header() {
                 Admin Panel
               </Link>
             )}
+            <NotificationBell />
             <Link
               href="/dashboard"
               className="px-2 py-1 md:px-3 md:py-2 text-[10px] sm:text-xs md:text-sm rounded bg-grey-100 text-grey-700 font-semibold transition-all hover:bg-grey-200"
@@ -101,7 +99,6 @@ export function Header() {
             </button>
           </div>
         ) : (
-          // Belum login: tampilkan tombol Login + Booking
           <div className="flex items-center gap-2">
             <Link
               href="/login"

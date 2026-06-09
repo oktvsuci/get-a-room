@@ -3,6 +3,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { prisma } from "@/lib/prisma"; // 1. Import Prisma
+import NotificationCenter from "@/components/NotificationCenter"; // 2. Import Komponen Notif
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -12,15 +14,32 @@ export default async function DashboardPage() {
 
   const nama = (user.user_metadata?.nama as string) || user.email?.split("@")[0] || "Pengguna";
 
+  // 3. Ambil data notifikasi lama milik user ini dari database PostgreSQL via Prisma
+  const initialNotifications = await prisma.notification.findMany({
+    where: {
+      userId: user.id,
+    },
+    orderBy: {
+      createdAt: "desc", // Paling baru muncul paling atas
+    },
+  });
+
   return (
     <main className="max-w-4xl mx-auto px-6 py-12">
       {/* Greeting */}
-      <div className="mb-10">
-        <p className="text-xs font-bold tracking-widest text-brand uppercase mb-2">Dashboard</p>
-        <h1 className="font-display text-3xl font-bold text-grey-900 mb-1">
-          Halo, {nama}! 👋
-        </h1>
-        <p className="text-grey-500">Selamat datang di portal peminjaman ruangan Telkom University.</p>
+      <div className="mb-10 flex justify-between items-start">
+        <div>
+          <p className="text-xs font-bold tracking-widest text-brand uppercase mb-2">Dashboard</p>
+          <h1 className="font-display text-3xl font-bold text-grey-900 mb-1">
+            Halo, {nama}! 👋
+          </h1>
+          <p className="text-grey-500">Selamat datang di portal peminjaman ruangan Telkom University.</p>
+        </div>
+
+        {/* 4. Letakkan Lonceng Notifikasi Real-time di Pojok Kanan Atas Greeting */}
+        <div className="mt-4">
+          <NotificationCenter userId={user.id} initialNotifications={initialNotifications} />
+        </div>
       </div>
 
       {/* Quick actions */}
@@ -72,7 +91,7 @@ export default async function DashboardPage() {
 
       {/* Info box */}
       <div className="p-5 bg-grey-50 border border-grey-200 rounded-xl text-sm text-grey-600">
-        💡 <strong className="text-grey-800">Cara kerja:</strong> Setelah mengajukan peminjaman, admin akan memverifikasi dan memberi keputusan dalam 1×24 jam kerja. Notifikasi akan dikirim ke email kamu.
+        💡 <strong className="text-grey-800">Cara kerja:</strong> Setelah mengajukan peminjaman, admin akan memverifikasi dan memberi keputusan dalam 1×24 jam kerja. Notifikasi akan langsung muncul di lonceng atas.
       </div>
     </main>
   );
