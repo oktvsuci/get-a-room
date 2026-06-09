@@ -3,57 +3,104 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 
-// DELETE — cancel booking (hanya jika pending & milik user)
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params; // Perbaikan Next.js: params harus di-await
+type Params = { params: Promise<{ id: string }> };
 
+async function getBookingForUser(bookingId: string) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!user) return { error: "Unauthorized", status: 401, booking: null };
 
-  const booking = await prisma.booking.findUnique({ where: { id } });
-  if (!booking) return NextResponse.json({ error: "Booking tidak ditemukan." }, { status: 404 });
-  if (booking.userId !== user.id) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  if (booking.status !== "pending") return NextResponse.json({ error: "Hanya booking pending yang bisa dibatalkan." }, { status: 400 });
+  const booking = await prisma.booking.findUnique({
+    where: { id: bookingId },
+    include: { room: true },
+  });
 
-  await prisma.booking.delete({ where: { id } });
-  return NextResponse.json({ success: true });
+  if (!booking) return { error: "Booking tidak ditemukan.", status: 404, booking: null };
+
+  const isOwner = booking.userId === user.id;
+  const isAdmin = user.user_metadata?.role === "admin";
+  if (!isOwner && !isAdmin) return { error: "Forbidden", status: 403, booking: null };
+
+  return { error: null, status: 200, booking };
 }
 
-// PATCH — edit booking (hanya jika pending & milik user)
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params; // Perbaikan Next.js: params harus di-await
+// PATCH /api/booking/[id] — edit booking (hanya jika status pending)
+export async function PATCH(req: NextRequest, { params }: Params) {
+  const { id } = await params;
+  const { error, status, booking } = await getBookingForUser(id);
 
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (error || !booking) {
+    return NextResponse.json({ error }, { status });
+  }
 
-  const booking = await prisma.booking.findUnique({ where: { id } });
-  if (!booking) return NextResponse.json({ error: "Booking tidak ditemukan." }, { status: 404 });
-  if (booking.userId !== user.id) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  if (booking.status !== "pending") return NextResponse.json({ error: "Hanya booking pending yang bisa diedit." }, { status: 400 });
+  if (booking.status !== "pending") {
+    return NextResponse.json(
+      { error: "Hanya booking Pending yang dapat diedit." },
+      { status: 409 }
+    );
+  }
 
   const body = await req.json();
+
+  const roomId     = body.roomId     ?? booking.roomId;
+  const tanggal    = body.tanggal    ?? booking.tanggal;
+  const jamMulai   = body.jamMulai   ?? booking.jamMulai;
+  const jamSelesai = body.jamSelesai ?? booking.jamSelesai;
+
+  // Cek konflik jadwal
+  const conflicts = await prisma.booking.findMany({
+    where: {
+      id:       { not: id },
+      roomId,
+      tanggal,
+      status:   "approved",
+      AND: [
+        { jamMulai:   { lt: jamSelesai } },
+        { jamSelesai: { gt: jamMulai   } },
+      ],
+    },
+  });
+
+  if (conflicts.length > 0) {
+    return NextResponse.json(
+      { error: `Konflik jadwal: ruangan sudah dibooking pukul ${conflicts[0].jamMulai}–${conflicts[0].jamSelesai}.` },
+      { status: 409 }
+    );
+  }
 
   const updated = await prisma.booking.update({
     where: { id },
     data: {
-      roomId:     body.roomId     ?? booking.roomId,
-      tanggal:    body.tanggal    ?? booking.tanggal,
-      jamMulai:   body.jamMulai   ?? booking.jamMulai,
-      jamSelesai: body.jamSelesai ?? booking.jamSelesai,
-      kegiatan:   body.kegiatan   ?? booking.kegiatan,
-      instansi:   body.instansi   ?? booking.instansi,
-      jabatan:    body.jabatan    ?? booking.jabatan,
+      ...(body.roomId     && { roomId:     body.roomId }),
+      ...(body.tanggal    && { tanggal:    body.tanggal }),
+      ...(body.jamMulai   && { jamMulai:   body.jamMulai }),
+      ...(body.jamSelesai && { jamSelesai: body.jamSelesai }),
+      ...(body.kegiatan   && { kegiatan:   body.kegiatan }),
+      ...(body.instansi   && { instansi:   body.instansi }),
+      ...(body.jabatan    && { jabatan:    body.jabatan }),
     },
     include: { room: { select: { namaGedung: true, nomorRuangan: true } } },
   });
 
-  return NextResponse.json({ success: true, booking: updated });
+  return NextResponse.json({ booking: updated });
+}
+
+// DELETE /api/booking/[id] — cancel booking (hanya jika status pending)
+export async function DELETE(req: NextRequest, { params }: Params) {
+  const { id } = await params;
+  const { error, status, booking } = await getBookingForUser(id);
+
+  if (error || !booking) {
+    return NextResponse.json({ error }, { status });
+  }
+
+  if (booking.status !== "pending") {
+    return NextResponse.json(
+      { error: "Hanya booking Pending yang dapat dibatalkan." },
+      { status: 409 }
+    );
+  }
+
+  await prisma.booking.delete({ where: { id } });
+  return NextResponse.json({ success: true });
 }

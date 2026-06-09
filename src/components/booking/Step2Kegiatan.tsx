@@ -31,20 +31,36 @@ export function Step2Kegiatan({ data, update }: StepProps) {
   const [loadingRooms, setLoadingRooms] = useState(true);
 
   useEffect(() => {
-    fetch("/api/rooms")
-      .then((r) => r.json())
-      .then(({ rooms: rawRooms }) => {
-        setRooms(
-          rawRooms.map((r: { id: string; namaGedung: string; nomorRuangan: string; isAvailable: boolean; needsPermit: boolean }) => ({
-            id: r.id,
-            label: `${r.namaGedung} — ${r.nomorRuangan}`,
-            isAvailable: r.isAvailable,
-            needsPermit: r.needsPermit,
-          }))
-        );
-      })
-      .finally(() => setLoadingRooms(false));
-  }, []);
+  fetch("/api/rooms")
+    .then(async (r) => {
+      const text = await r.text();
+      if (!text) throw new Error("Response kosong dari /api/rooms");
+      try {
+        return JSON.parse(text);
+      } catch {
+        throw new Error(`Response bukan JSON: ${text.slice(0, 200)}`);
+      }
+    })
+    .then(({ rooms: rawRooms }) => {
+      if (!rawRooms) return;
+      setRooms(
+        rawRooms.map((r: {
+          id: string;
+          namaGedung: string;
+          nomorRuangan: string;
+          isAvailable: boolean;
+          needsPermit: boolean;
+        }) => ({
+          id: r.id,
+          label: `${r.namaGedung} — ${r.nomorRuangan}`,
+          isAvailable: r.isAvailable,
+          needsPermit: r.needsPermit,
+        }))
+      );
+    })
+    .catch((err) => console.error("Error fetch rooms:", err))
+    .finally(() => setLoadingRooms(false));
+}, []);
 
   const { register, watch, formState: { errors } } = useForm<Step2Fields>({
     resolver: zodResolver(step2Schema),
@@ -163,3 +179,4 @@ export function Step2Kegiatan({ data, update }: StepProps) {
     </div>
   );
 }
+
