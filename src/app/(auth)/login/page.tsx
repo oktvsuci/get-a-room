@@ -15,6 +15,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const reason = searchParams.get("reason");
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -54,6 +55,17 @@ export default function LoginPage() {
         <p className="text-sm text-grey-500 mb-6">
           Gunakan akun SSO Telkom University kamu
         </p>
+
+        {reason === "booking" && (
+          <div className="mb-5 flex items-start gap-3 bg-brand/5 border border-brand/20 rounded-lg px-4 py-3.5">
+            <span className="text-lg flex-shrink-0">🔒</span>
+            <p className="text-sm text-grey-700">
+              <strong className="text-grey-900">Login diperlukan untuk booking.</strong>
+              <br />
+              Masuk dengan akun SSO Telkom University untuk mengajukan peminjaman ruangan.
+            </p>
+          </div>
+        )}
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>

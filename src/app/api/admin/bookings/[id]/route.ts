@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
+import { createNotification } from "@/lib/notifications";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -22,7 +23,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   try {
     body = await req.json();
   } catch {
-    return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
+    return NextResponse.json({ error: "Invalid JSON." }, { status: 400 });
   }
 
   const { action, catatanAdmin } = body as {
@@ -43,6 +44,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: "Booking tidak ditemukan." }, { status: 404 });
   }
 
+  // Cek konflik jika approve
   if (action === "approve") {
     const conflicts = await prisma.booking.findMany({
       where: {
@@ -56,7 +58,6 @@ export async function PATCH(req: NextRequest, { params }: Params) {
         ],
       },
     });
-
     if (conflicts.length > 0) {
       return NextResponse.json(
         { error: `Konflik jadwal: sudah ada booking disetujui pukul ${conflicts[0].jamMulai}–${conflicts[0].jamSelesai}.` },
@@ -73,6 +74,23 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     },
     include: { room: { select: { namaGedung: true, nomorRuangan: true } } },
   });
+
+  // Kirim notif ke user pemohon
+  if (booking.userId) {
+    try {
+      await createNotification({
+        userId:    booking.userId,
+        type:      action === "approve" ? "booking_approved" : "booking_rejected",
+        bookingId: booking.id,
+        roomLabel: `${booking.room.namaGedung} — ${booking.room.nomorRuangan}`,
+        tanggal:   booking.tanggal,
+        jamMulai:  booking.jamMulai,
+        jamSelesai: booking.jamSelesai,
+      });
+    } catch (e) {
+      console.error("Gagal kirim notif user:", e);
+    }
+  }
 
   return NextResponse.json({ booking: updated });
 }

@@ -28,9 +28,9 @@ type Booking = {
 };
 
 const STATUS_CFG = {
-  pending:  { label: "Menunggu", bg: "bg-yellow-50", text: "text-yellow-700", border: "border-yellow-200", dot: "bg-yellow-400" },
-  approved: { label: "Disetujui", bg: "bg-green-50",  text: "text-green-700",  border: "border-green-200",  dot: "bg-green-500"  },
-  rejected: { label: "Ditolak",   bg: "bg-red-50",     text: "text-red-700",    border: "border-red-200",    dot: "bg-red-500"    },
+  pending: { label: "Menunggu", bg: "bg-yellow-50", text: "text-yellow-700", border: "border-yellow-200", dot: "bg-yellow-400" },
+  approved: { label: "Disetujui", bg: "bg-green-50", text: "text-green-700", border: "border-green-200", dot: "bg-green-500" },
+  rejected: { label: "Ditolak", bg: "bg-red-50", text: "text-red-700", border: "border-red-200", dot: "bg-red-500" },
 } as const;
 
 type Props = {
@@ -44,30 +44,31 @@ export function AdminBookingTable({ initialBookings, initialTotal, rooms }: Prop
   const [isPending, startTransition] = useTransition();
 
   // Data state
-  const [bookings,   setBookings]   = useState(initialBookings);
-  const [total,      setTotal]      = useState(initialTotal);
-  const [page,       setPage]       = useState(1);
+  const [bookings, setBookings] = useState(initialBookings);
+  const [total, setTotal] = useState(initialTotal);
+  const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(Math.ceil(initialTotal / 15));
 
   // Filter state
   const [filterStatus, setFilterStatus] = useState("");
-  const [filterRoom,   setFilterRoom]   = useState("");
-  const [filterQ,      setFilterQ]      = useState("");
-  const [filterDate,   setFilterDate]   = useState("");
+  const [filterRoom, setFilterRoom] = useState("");
+  const [filterQ, setFilterQ] = useState("");
+  const [filterDate, setFilterDate] = useState("");
 
   // Action state
-  const [actionTarget,  setActionTarget]  = useState<Booking | null>(null);
-  const [actionType,    setActionType]    = useState<"approve" | "reject" | "delete" | null>(null);
-  const [catatanAdmin,  setCatatanAdmin]  = useState("");
+  const [actionTarget, setActionTarget] = useState<Booking | null>(null);
+  const [actionType, setActionType] = useState<"approve" | "reject" | "delete" | null>(null);
+  const [catatanAdmin, setCatatanAdmin] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
-  const [actionError,   setActionError]   = useState<string | null>(null);
-  const [expandedId,    setExpandedId]    = useState<string | null>(null);
-  const [showInternal,  setShowInternal]  = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [showInternal, setShowInternal] = useState(false);
 
   // Fetch dengan filter
   const fetchBookings = useCallback(async (params: {
-    status?: string; roomId?: string; q?: string; tanggal?: string; page?: number;
-  }) => {
+  status?: string; roomId?: string; q?: string; tanggal?: string; page?: number;
+}) => {
+  try {
     const sp = new URLSearchParams();
     if (params.status)  sp.set("status",  params.status);
     if (params.roomId)  sp.set("roomId",  params.roomId);
@@ -76,24 +77,46 @@ export function AdminBookingTable({ initialBookings, initialTotal, rooms }: Prop
     if (params.page)    sp.set("page",    String(params.page));
 
     const res  = await fetch(`/api/admin/bookings?${sp.toString()}`);
-    const data = await res.json();
+    const text = await res.text();
+
+    if (!text) {
+      console.error("Response kosong dari /api/admin/bookings");
+      return;
+    }
+
+    const data = JSON.parse(text);
+
+    if (!res.ok) {
+      console.error("Error dari API:", data.error);
+      return;
+    }
+
     setBookings(data.bookings ?? []);
     setTotal(data.total ?? 0);
     setTotalPages(data.totalPages ?? 1);
-  }, []);
 
-  async function applyFilter(overrides: Partial<{
-    status: string; roomId: string; q: string; tanggal: string; page: number;
-  }> = {}) {
-    const newPage = overrides.page ?? 1;
-    setPage(newPage);
-    await fetchBookings({
-      status:  overrides.status  ?? filterStatus,
-      roomId:  overrides.roomId  ?? filterRoom,
-      q:       overrides.q       ?? filterQ,
-      tanggal: overrides.tanggal ?? filterDate,
-      page:    newPage,
-    });
+  } catch (err) {
+    console.error("fetchBookings error:", err);
+  }
+}, []);
+
+  // Ganti fungsi applyFilter
+  async function applyFilter(overrides: {
+    status?: string;
+    roomId?: string;
+    q?: string;
+    tanggal?: string;
+    page?: number;
+  } = {}) {
+    const params = {
+      status: overrides.status !== undefined ? overrides.status : filterStatus,
+      roomId: overrides.roomId !== undefined ? overrides.roomId : filterRoom,
+      q: overrides.q !== undefined ? overrides.q : filterQ,
+      tanggal: overrides.tanggal !== undefined ? overrides.tanggal : filterDate,
+      page: overrides.page ?? 1,
+    };
+    setPage(params.page);
+    await fetchBookings(params);
   }
 
   function resetFilter() {
@@ -112,9 +135,9 @@ export function AdminBookingTable({ initialBookings, initialTotal, rooms }: Prop
     setActionError(null);
 
     const res = await fetch(`/api/admin/bookings/${actionTarget.id}`, {
-      method:  "PATCH",
+      method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify({ action: actionType, catatanAdmin }),
+      body: JSON.stringify({ action: actionType, catatanAdmin }),
     });
     const data = await res.json();
 
@@ -141,7 +164,7 @@ export function AdminBookingTable({ initialBookings, initialTotal, rooms }: Prop
     setActionLoading(true);
     setActionError(null);
 
-    const res  = await fetch(`/api/admin/bookings/${actionTarget.id}`, { method: "DELETE" });
+    const res = await fetch(`/api/admin/bookings/${actionTarget.id}`, { method: "DELETE" });
     const data = await res.json();
 
     if (!res.ok) {
@@ -184,48 +207,70 @@ export function AdminBookingTable({ initialBookings, initialTotal, rooms }: Prop
           </div>
 
           {/* Status filter */}
-          <div>
-            <label className="block text-xs font-semibold text-grey-600 mb-1">Status</label>
-            <select
-              value={filterStatus}
-              onChange={(e) => { setFilterStatus(e.target.value); applyFilter({ status: e.target.value }); }}
-              className="px-3 py-2 border border-grey-300 rounded-md text-sm focus:outline-none focus:border-brand transition-all bg-white"
-            >
-              <option value="">Semua Status</option>
-              <option value="pending">Menunggu</option>
-              <option value="approved">Disetujui</option>
-              <option value="rejected">Ditolak</option>
-            </select>
-          </div>
+          <select
+            value={filterStatus}
+            onChange={async (e) => {
+              const val = e.target.value;
+              setFilterStatus(val);
+              await applyFilter({ status: val });
+            }}
+            className="px-3 py-2 border border-grey-300 rounded-md text-sm focus:outline-none focus:border-brand transition-all bg-white"
+          >
+            <option value="">Semua Status</option>
+            <option value="pending">Menunggu</option>
+            <option value="approved">Disetujui</option>
+            <option value="rejected">Ditolak</option>
+          </select>
 
           {/* Room filter */}
-          <div>
-            <label className="block text-xs font-semibold text-grey-600 mb-1">Ruangan</label>
-            <select
-              value={filterRoom}
-              onChange={(e) => { setFilterRoom(e.target.value); applyFilter({ roomId: e.target.value }); }}
-              className="px-3 py-2 border border-grey-300 rounded-md text-sm focus:outline-none focus:border-brand transition-all bg-white"
-            >
-              <option value="">Semua Ruangan</option>
-              {rooms.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.namaGedung} — {r.nomorRuangan}
-                </option>
-              ))}
-            </select>
-          </div>
+          <select
+            value={filterRoom}
+            onChange={async (e) => {
+              const val = e.target.value;
+              setFilterRoom(val);
+              await applyFilter({ roomId: val });
+            }}
+            className="px-3 py-2 border border-grey-300 rounded-md text-sm focus:outline-none focus:border-brand transition-all bg-white"
+          >
+            <option value="">Semua Ruangan</option>
+            {rooms.map((r) => (
+              <option key={r.id} value={r.id}>
+                {r.namaGedung} — {r.nomorRuangan}
+              </option>
+            ))}
+          </select>
 
           {/* Date filter */}
-          <div>
-            <label className="block text-xs font-semibold text-grey-600 mb-1">Tanggal</label>
-            <input
-              type="date"
-              value={filterDate}
-              onChange={(e) => { setFilterDate(e.target.value); applyFilter({ tanggal: e.target.value }); }}
-              className="px-3 py-2 border border-grey-300 rounded-md text-sm focus:outline-none focus:border-brand transition-all bg-white"
-            />
-          </div>
+          <input
+            type="date"
+            value={filterDate}
+            onChange={async (e) => {
+              const val = e.target.value;
+              setFilterDate(val);
+              await applyFilter({ tanggal: val });
+            }}
+            className="px-3 py-2 border border-grey-300 rounded-md text-sm focus:outline-none focus:border-brand transition-all bg-white"
+          />
 
+          {/* Search — tambah tombol search di sampingnya */}
+          <div className="flex gap-2 flex-1 min-w-[180px]">
+            <input
+              type="text"
+              placeholder="Cari nama / NIM..."
+              value={filterQ}
+              onChange={(e) => setFilterQ(e.target.value)}
+              onKeyDown={async (e) => {
+                if (e.key === "Enter") await applyFilter({ q: filterQ });
+              }}
+              className="flex-1 px-3 py-2 border border-grey-300 rounded-md text-sm focus:outline-none focus:border-brand focus:ring-2 focus:ring-brand/20 transition-all"
+            />
+            <button
+              onClick={() => applyFilter({ q: filterQ })}
+              className="px-3 py-2 bg-brand text-white text-sm rounded-md hover:bg-brand-dark transition-all"
+            >
+              Cari
+            </button>
+          </div>
           <button
             onClick={resetFilter}
             className="px-3 py-2 border border-grey-300 rounded-md text-sm text-grey-600 hover:bg-grey-100 transition-all"
@@ -274,9 +319,9 @@ export function AdminBookingTable({ initialBookings, initialTotal, rooms }: Prop
               </tr>
             ) : (
               bookings.map((b) => {
-                const cfg       = STATUS_CFG[b.status as keyof typeof STATUS_CFG] ?? STATUS_CFG.pending;
+                const cfg = STATUS_CFG[b.status as keyof typeof STATUS_CFG] ?? STATUS_CFG.pending;
                 const isPendingAction = b.status === "pending";
-                const expanded  = expandedId === b.id;
+                const expanded = expandedId === b.id;
 
                 return (
                   <React.Fragment key={b.id}>
@@ -419,17 +464,15 @@ export function AdminBookingTable({ initialBookings, initialTotal, rooms }: Prop
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
             {/* Color bar */}
-            <div className={`h-1.5 w-full ${
-              actionType === "approve" ? "bg-green-500" :
-              actionType === "reject"  ? "bg-red-500"   : "bg-grey-400"
-            }`} />
+            <div className={`h-1.5 w-full ${actionType === "approve" ? "bg-green-500" :
+              actionType === "reject" ? "bg-red-500" : "bg-grey-400"
+              }`} />
 
             <div className="p-6">
               <div className="flex items-start gap-4 mb-5">
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
-                  actionType === "approve" ? "bg-green-100" :
-                  actionType === "reject"  ? "bg-red-100"   : "bg-grey-100"
-                }`}>
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${actionType === "approve" ? "bg-green-100" :
+                  actionType === "reject" ? "bg-red-100" : "bg-grey-100"
+                  }`}>
                   <span className="text-xl">
                     {actionType === "approve" ? "✅" : actionType === "reject" ? "❌" : "🗑️"}
                   </span>
@@ -437,7 +480,7 @@ export function AdminBookingTable({ initialBookings, initialTotal, rooms }: Prop
                 <div>
                   <h3 className="font-display text-xl font-bold text-grey-900 mb-1">
                     {actionType === "approve" ? "Setujui Pengajuan?" :
-                     actionType === "reject"  ? "Tolak Pengajuan?"   : "Hapus Booking?"}
+                      actionType === "reject" ? "Tolak Pengajuan?" : "Hapus Booking?"}
                   </h3>
                   <p className="text-sm text-grey-500">
                     <strong className="text-grey-800">{actionTarget.nama}</strong> —{" "}
@@ -496,13 +539,13 @@ export function AdminBookingTable({ initialBookings, initialTotal, rooms }: Prop
                   className={[
                     "flex-1 py-2.5 rounded-md text-white text-sm font-semibold transition-all disabled:opacity-60 disabled:cursor-not-allowed",
                     actionType === "approve" ? "bg-green-500 hover:bg-green-600" :
-                    actionType === "reject"  ? "bg-red-500 hover:bg-red-600"    :
-                    "bg-grey-700 hover:bg-grey-800",
+                      actionType === "reject" ? "bg-red-500 hover:bg-red-600" :
+                        "bg-grey-700 hover:bg-grey-800",
                   ].join(" ")}
                 >
                   {actionLoading ? "Memproses..." :
-                   actionType === "approve" ? "Ya, Setujui" :
-                   actionType === "reject"  ? "Ya, Tolak"   : "Hapus Permanen"}
+                    actionType === "approve" ? "Ya, Setujui" :
+                      actionType === "reject" ? "Ya, Tolak" : "Hapus Permanen"}
                 </button>
               </div>
             </div>
