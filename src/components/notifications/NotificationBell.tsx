@@ -256,7 +256,7 @@ export function NotificationBell({ userId }: { userId: string }) {
               <button
                 onClick={() => {
                   setOpen(false);
-                  router.push("/dashboard/peminjaman");
+                  router.push("/notifikasi");
                 }}
                 className="w-full text-xs text-brand font-semibold hover:underline text-center"
               >

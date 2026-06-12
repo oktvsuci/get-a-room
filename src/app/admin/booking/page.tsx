@@ -1,6 +1,8 @@
 // src/app/admin/booking/page.tsx
 import { prisma } from "@/lib/prisma";
 import { AdminBookingTable } from "@/components/admin/AdminBookingTable";
+import Link from "next/link";
+
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +23,11 @@ export default async function AdminBookingPage() {
 
   return (
     <div className="p-6 md:p-8 max-w-7xl mx-auto">
+      <Link href="/admin"
+        className="inline-flex items-center gap-1.5 text-sm text-grey-500 hover:text-brand transition-colors mb-4"
+      >
+        Kembali
+      </Link>
       <div className="mb-8">
         <p className="text-xs font-bold tracking-widest text-brand uppercase mb-1">
           Admin Panel

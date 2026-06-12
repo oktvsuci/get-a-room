@@ -2,8 +2,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createClient as createServerClient } from "@/lib/supabase/server";
+import { createClient as createBrowserClient } from "@/lib/supabase/client";
 import { notifyAdmins } from "@/lib/notifications";
-
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,15 +21,13 @@ export async function POST(req: NextRequest) {
     const jamSelesai = formData.get("jamSelesai") as string;
     const kegiatan   = formData.get("kegiatan")   as string;
 
-    const supabase = await createServerClient();
-
+    // Ambil userId dari session
     let userId: string | null = null;
     try {
+      const supabase = await createServerClient();
       const { data: { user } } = await supabase.auth.getUser();
       userId = user?.id ?? null;
-    } catch {
-      // Tidak login — lanjutkan tanpa userId
-    }
+    } catch { /* tidak login */ }
 
     // Validasi room
     const room = await prisma.room.findUnique({ where: { id: roomId } });
@@ -57,7 +55,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Upload PDF ke Supabase Storage
+    // Upload PDF
     const file = formData.get("fileSurat") as File;
     if (!file || file.size === 0) {
       return NextResponse.json({ success: false, message: "File surat tidak ditemukan." }, { status: 400 });
@@ -65,38 +63,36 @@ export async function POST(req: NextRequest) {
 
     const fileName   = `${Date.now()}-${file.name}`;
     const fileBuffer = await file.arrayBuffer();
+    const supabase   = createBrowserClient();
 
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from("surat-permohonan")
       .upload(fileName, fileBuffer, { contentType: "application/pdf", upsert: false });
 
     if (uploadError) {
-      return NextResponse.json({ success: false, message: `Gagal upload file: ${uploadError.message}` }, { status: 500 });
+      return NextResponse.json({ success: false, message: `Gagal upload: ${uploadError.message}` }, { status: 500 });
     }
 
     const { data: urlData } = supabase.storage.from("surat-permohonan").getPublicUrl(uploadData.path);
 
-    // Simpan ke database
+    // Simpan booking
     const booking = await prisma.booking.create({
-      data: {
-        nama, nim, email, hp, instansi, jabatan,
-        roomId, tanggal, jamMulai, jamSelesai, kegiatan,
-        fileSuratUrl: urlData.publicUrl,
-        userId,
-      },
+      data: { nama, nim, email, hp, instansi, jabatan, roomId, tanggal, jamMulai, jamSelesai, kegiatan, fileSuratUrl: urlData.publicUrl, userId },
     });
 
-    // Notifikasi booking masuk
-    if (userId) {
-      await prisma.notification.create({
-        data: {
-          userId,
-          bookingId: booking.id,
-          title: "Pengajuan Dikirim ✅",
-          message: `Pengajuan peminjaman ruangan ${room.namaGedung} (${room.nomorRuangan}) untuk tanggal ${tanggal} sedang diproses admin.`,
-          type: "info",
-        },
+    // Kirim notif ke admin
+    try {
+      await notifyAdmins({
+        type:       "booking_submitted",
+        bookingId:  booking.id,
+        roomLabel:  `${room.namaGedung} — ${room.nomorRuangan}`,
+        tanggal,
+        jamMulai,
+        jamSelesai,
+        nama,
       });
+    } catch (e) {
+      console.error("Gagal kirim notif admin:", e);
     }
 
     return NextResponse.json({ success: true, bookingId: booking.id }, { status: 201 });
@@ -105,28 +101,4 @@ export async function POST(req: NextRequest) {
     console.error("BOOKING ERROR:", error);
     return NextResponse.json({ success: false, message: String(error) }, { status: 500 });
   }
-
-  const booking = await prisma.booking.create({
-      data: {
-        nama, nim, email, hp, instansi, jabatan,
-        roomId, tanggal, jamMulai, jamSelesai, kegiatan,
-        fileSuratUrl: urlData.publicUrl,
-        userId,
-      },
-      include: { room: true },  // ← tambah include
-    });
-
-    // ── Trigger notifikasi ke admin ──────────────────────
-    await notifyAdmins({
-      type:      "booking_submitted",
-      bookingId: booking.id,
-      roomLabel: `${booking.room.namaGedung} — ${booking.room.nomorRuangan}`,
-      tanggal:   booking.tanggal,
-      jamMulai:  booking.jamMulai,
-      jamSelesai:booking.jamSelesai,
-      nama:      booking.nama,
-    });
-    // ────────────────────────────────────────────────────
-
-    return NextResponse.json({ success: true, bookingId: booking.id }, { status: 201 });
 }

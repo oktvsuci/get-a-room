@@ -47,17 +47,6 @@ model Booking {
   room         Room     @relation(fields: [roomId], references: [id])
 }
 
-model Notification {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  userId    String
-  title     String
-  message   String
-  isRead    Boolean  @default(false)
-  type      String   @default("info")
-  bookingId String?
-}
-
 model Profile {
   id        String   @id @default(cuid())
   updatedAt DateTime @updatedAt
@@ -69,12 +58,12 @@ model Profile {
 
 model Notification {
   id        String   @id @default(uuid())
-  userId    String   // Diarahkan ke user yang menerima notifikasi
-  title     String   // Contoh: "Peminjaman Disetujui 🎉" atau "Peminjaman Ditolak ❌"
-  message   String   // Contoh: "Pengajuan ruangan Aula Gedung A telah disetujui oleh admin."
-  isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
-
-  // Jika kamu punya relasi ke model User, bisa ditambahkan di sini
-  // user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  type      String   @default("info")
+  bookingId String?
+  href      String?
 }

@@ -1,4 +1,4 @@
-// src/middleware.ts  ← letakkan di root /src/, sejajar dengan /app/
+// src/middleware.ts
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
@@ -26,38 +26,41 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // PENTING: Jangan jalankan kode antara createServerClient dan
-  // auth.getUser(). Bisa menyebabkan bug sesi yang sulit di-debug.
   const { data: { user } } = await supabase.auth.getUser();
-
-  // Proteksi route: jika belum login, redirect ke /login
   const { pathname } = request.nextUrl;
 
-  const protectedRoutes = ["/dashboard", "/admin"];
-  const isProtected = protectedRoutes.some((r) => pathname.startsWith(r));
+  // ── Route yang butuh login ─────────────────────────────
+  const authRequired = ["/booking", "/dashboard", "/notifikasi"];
+  const needsAuth = authRequired.some((r) => pathname.startsWith(r));
 
-  if (isProtected && !user) {
+  if (needsAuth && !user) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("redirectTo", pathname);
+    // Tambah pesan konteks supaya halaman login bisa tampilkan info
+    if (pathname.startsWith("/booking")) {
+      url.searchParams.set("reason", "booking");
+    }
     return NextResponse.redirect(url);
   }
 
-  // Proteksi route admin: hanya role 'admin' yang boleh masuk
+  // ── Route khusus admin ────────────────────────────────
   if (pathname.startsWith("/admin")) {
-    const role = user?.user_metadata?.role;
-    if (role !== "admin") {
+    if (!user) {
       const url = request.nextUrl.clone();
-      url.pathname = "/";
+      url.pathname = "/login";
+      url.searchParams.set("redirectTo", pathname);
       return NextResponse.redirect(url);
+    }
+    if (user.user_metadata?.role !== "admin") {
+      return NextResponse.redirect(new URL("/", request.url));
     }
   }
 
-  // Redirect user yang sudah login saat buka /login atau /register
+  // ── Redirect user yang sudah login dari /login & /register ──
   if ((pathname === "/login" || pathname === "/register") && user) {
-    const url = request.nextUrl.clone();
-    url.pathname = user.user_metadata?.role === "admin" ? "/admin" : "/dashboard";
-    return NextResponse.redirect(url);
+    const dest = user.user_metadata?.role === "admin" ? "/admin" : "/dashboard";
+    return NextResponse.redirect(new URL(dest, request.url));
   }
 
   return supabaseResponse;
