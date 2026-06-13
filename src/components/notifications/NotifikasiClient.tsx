@@ -10,7 +10,7 @@ type Notification = {
   type: string;
   title: string;
   message: string;
-  href: string;
+  href: string | null;  // ← tambah | null
   isRead: boolean;
 };
 
@@ -62,7 +62,7 @@ export function NotifikasiClient({
 
   async function handleClick(notif: Notification) {
     await markRead(notif.id);
-    router.push(notif.href);
+    if (notif.href) router.push(notif.href);  // ← guard null sebelum push
   }
 
   if (notifs.length === 0) {

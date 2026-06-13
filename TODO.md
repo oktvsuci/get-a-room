@@ -1,12 +1,12 @@
 # TODO
-
-- [ ] Inspect current `Header.tsx` layout and Tailwind classes (done).
-- [ ] Create an edit plan for refactoring Tailwind classes to keep nav horizontal on mobile (pending approval).
-- [ ] Refactor `Header.tsx`:
-  - [ ] Update `<header>` classes to `w-full flex flex-row items-center justify-between px-2 md:px-6 py-3` (and keep sticky/border/shadow styling).
-  - [ ] Update nav links container to `flex flex-row items-center gap-1.5 md:gap-6 text-[10px] sm:text-xs md:text-base whitespace-nowrap`.
-  - [ ] Update Booking button to `px-2 py-1 md:px-4 md:py-2 text-[10px] sm:text-xs md:text-sm rounded` with existing colors.
-  - [ ] Ensure logo/text left scales down slightly on mobile without causing overflow.
-- [ ] Run `next lint` (or build) to ensure no TypeScript/ESLint errors.
-- [ ] Provide a summary of changes.
+- [x] Locate all .ts/.tsx files under `src/` that call `useSearchParams()` from `next/navigation` (fallback grep via PowerShell; ripgrep not available).
+- [x] Identify affected files:
+  - [x] `src/app/(auth)/login/page.tsx`
+  - [x] `src/components/booking/BookingWizard.tsx`
+- [ ] For each affected file:
+  - [ ] Extract the component that calls `useSearchParams()` into a separate inner component.
+  - [ ] Wrap it in the default export (or exported component) with `<Suspense fallback={<div>Loading...</div>}>`.
+  - [ ] Keep all existing logic, styling, and functionality identical.
+- [ ] Apply changes to all affected files in one batch.
+- [ ] Run typecheck/lint.
 

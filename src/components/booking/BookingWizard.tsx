@@ -1,7 +1,7 @@
-// src/components/booking/BookingWizard.tsx
+ // src/components/booking/BookingWizard.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Step1Pemohon } from "./Step1Pemohon";
@@ -96,7 +96,7 @@ function SuccessModal({ data, onClose }: { data: BookingData; onClose: () => voi
 }
 
 // ── Main Wizard ──────────────────────────────────────────
-export function BookingWizard() {
+function BookingWizardInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [current, setCurrent] = useState(1);
@@ -104,6 +104,7 @@ export function BookingWizard() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
 
   // Auto-fill dari query param (?roomId=xxx&ruangan=yyy dari halaman /ruangan)
   // dan dari session Supabase
@@ -203,7 +204,9 @@ export function BookingWizard() {
       {showSuccess && <SuccessModal data={data} onClose={handleClose} />}
 
       <div className="bg-white border border-grey-200 rounded-lg shadow-sm overflow-hidden w-full">
+
         {/* Progress Header */}
+
         <div className="flex bg-grey-50 border-b border-grey-200 px-4 sm:px-8 py-4 sm:py-6">
           {STEPS.map((s, i) => {
             const done   = current > s.num;
@@ -283,5 +286,13 @@ export function BookingWizard() {
         </div>
       </div>
     </>
+  );
+}
+
+export function BookingWizard() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <BookingWizardInner />
+    </Suspense>
   );
 }
